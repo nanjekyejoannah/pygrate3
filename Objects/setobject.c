@@ -2217,6 +2217,7 @@ static PyNumberMethods frozenset_as_number = {
     (binaryfunc)set_and,                /*nb_and*/
     (binaryfunc)set_xor,                /*nb_xor*/
     (binaryfunc)set_or,                 /*nb_or*/
+    0,                                  /*nb_coerce*/
 };
 
 PyDoc_STRVAR(frozenset_doc,

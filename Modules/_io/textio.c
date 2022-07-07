@@ -171,6 +171,7 @@ PyTypeObject PyTextIOBase_Type = {
     0,                          /* tp_traverse */
     0,                          /* tp_clear */
     0,                          /* tp_richcompare */
+    0,                          /* tp_compare*/
     0,                          /* tp_weaklistoffset */
     0,                          /* tp_iter */
     0,                          /* tp_iternext */
@@ -3182,6 +3183,7 @@ PyTypeObject PyIncrementalNewlineDecoder_Type = {
     0,                          /* tp_traverse */
     0,                          /* tp_clear */
     0,                          /* tp_richcompare */
+    0,                          /* tp_compare*/
     0,                          /*tp_weaklistoffset*/
     0,                          /* tp_iter */
     0,                          /* tp_iternext */
@@ -3267,6 +3269,7 @@ PyTypeObject PyTextIOWrapper_Type = {
     (traverseproc)textiowrapper_traverse, /* tp_traverse */
     (inquiry)textiowrapper_clear, /* tp_clear */
     0,                          /* tp_richcompare */
+    0,                          /* tp_compare*/
     offsetof(textio, weakreflist), /*tp_weaklistoffset*/
     0,                          /* tp_iter */
     (iternextfunc)textiowrapper_iternext, /* tp_iternext */

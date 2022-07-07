@@ -1050,6 +1050,7 @@ PyTypeObject PyBytesIO_Type = {
     (traverseproc)bytesio_traverse,            /*tp_traverse*/
     (inquiry)bytesio_clear,                    /*tp_clear*/
     0,                                         /*tp_richcompare*/
+    0,                                         /* tp_compare*/
     offsetof(bytesio, weakreflist),      /*tp_weaklistoffset*/
     PyObject_SelfIter,                         /*tp_iter*/
     (iternextfunc)bytesio_iternext,            /*tp_iternext*/
@@ -1149,6 +1150,7 @@ Py_EXPORTED_SYMBOL PyTypeObject _PyBytesIOBuffer_Type = {
     (traverseproc)bytesiobuf_traverse,         /*tp_traverse*/
     0,                                         /*tp_clear*/
     0,                                         /*tp_richcompare*/
+    0,                                         /* tp_compare*/
     0,                                         /*tp_weaklistoffset*/
     0,                                         /*tp_iter*/
     0,                                         /*tp_iternext*/

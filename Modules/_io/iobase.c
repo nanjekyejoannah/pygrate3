@@ -852,6 +852,7 @@ PyTypeObject PyIOBase_Type = {
     (traverseproc)iobase_traverse, /* tp_traverse */
     (inquiry)iobase_clear,      /* tp_clear */
     0,                          /* tp_richcompare */
+    0,                          /* tp_compare*/
     offsetof(iobase, weakreflist), /* tp_weaklistoffset */
     iobase_iter,                /* tp_iter */
     iobase_iternext,            /* tp_iternext */
@@ -1045,6 +1046,7 @@ PyTypeObject PyRawIOBase_Type = {
     0,                          /* tp_traverse */
     0,                          /* tp_clear */
     0,                          /* tp_richcompare */
+    0,                          /* tp_compare*/
     0,                          /* tp_weaklistoffset */
     0,                          /* tp_iter */
     0,                          /* tp_iternext */

@@ -989,6 +989,7 @@ static PyTypeObject OSSAudioType = {
     0,                          /*tp_traverse*/
     0,                          /*tp_clear*/
     0,                          /*tp_richcompare*/
+    0,                          /* tp_compare*/
     0,                          /*tp_weaklistoffset*/
     0,                          /*tp_iter*/
     0,                          /*tp_iternext*/
@@ -1023,6 +1024,7 @@ static PyTypeObject OSSMixerType = {
     0,                              /*tp_traverse*/
     0,                              /*tp_clear*/
     0,                              /*tp_richcompare*/
+    0,                              /* tp_compare*/
     0,                              /*tp_weaklistoffset*/
     0,                              /*tp_iter*/
     0,                              /*tp_iternext*/

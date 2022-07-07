@@ -621,6 +621,7 @@ static PyTypeObject record_Type = {
         0,                      /*tp_traverse*/
         0,                      /*tp_clear*/
         0,                      /*tp_richcompare*/
+        0,                     /* tp_compare*/
         0,                      /*tp_weaklistoffset*/
         0,                      /*tp_iter*/
         0,                      /*tp_iternext*/
@@ -835,6 +836,7 @@ static PyTypeObject summary_Type = {
         0,                      /*tp_traverse*/
         0,                      /*tp_clear*/
         0,                      /*tp_richcompare*/
+        0,                     /* tp_compare*/
         0,                      /*tp_weaklistoffset*/
         0,                      /*tp_iter*/
         0,                      /*tp_iternext*/
@@ -1013,6 +1015,7 @@ static PyTypeObject msiview_Type = {
         0,                      /*tp_traverse*/
         0,                      /*tp_clear*/
         0,                      /*tp_richcompare*/
+        0,                      /* tp_compare*/
         0,                      /*tp_weaklistoffset*/
         0,                      /*tp_iter*/
         0,                      /*tp_iternext*/
@@ -1146,6 +1149,7 @@ static PyTypeObject msidb_Type = {
         0,                      /*tp_traverse*/
         0,                      /*tp_clear*/
         0,                      /*tp_richcompare*/
+        0,                      /* tp_compare*/
         0,                      /*tp_weaklistoffset*/
         0,                      /*tp_iter*/
         0,                      /*tp_iternext*/

@@ -4403,6 +4403,7 @@ PyTypeObject PyType_Type = {
     0,                                          /* tp_getattr */
     0,                                          /* tp_setattr */
     0,                                          /* tp_as_async */
+    0,                                          /* tp_compare */
     (reprfunc)type_repr,                        /* tp_repr */
     &type_as_number,                            /* tp_as_number */
     0,                                          /* tp_as_sequence */
@@ -5616,6 +5617,7 @@ PyTypeObject PyBaseObject_Type = {
     0,                                          /* tp_vectorcall_offset */
     0,                                          /* tp_getattr */
     0,                                          /* tp_setattr */
+    0,                                          /* tp_compare */
     0,                                          /* tp_as_async */
     object_repr,                                /* tp_repr */
     0,                                          /* tp_as_number */
@@ -6857,6 +6859,32 @@ wrap_delitem(PyObject *self, PyObject *args, void *wrapped)
     Py_RETURN_NONE;
 }
 
+static PyObject *
+wrap_cmpfunc(PyObject *self, PyObject *args, void *wrapped)
+{
+    cmpfunc func = (cmpfunc)wrapped;
+    int res;
+    PyObject *other;
+
+    if (!check_num_args(args, 1))
+        return NULL;
+    other = PyTuple_GET_ITEM(args, 0);
+    if (Py_TYPE(other)->tp_compare != func &&
+        !PyType_IsSubtype(Py_TYPE(other), Py_TYPE(self))) {
+        PyErr_Format(
+            PyExc_TypeError,
+            "%s.__cmp__(x,y) requires y to be a '%s', not a '%s'",
+            Py_TYPE(self)->tp_name,
+            Py_TYPE(self)->tp_name,
+            Py_TYPE(other)->tp_name);
+        return NULL;
+    }
+    res = (*func)(self, other);
+    if (PyErr_Occurred())
+        return NULL;
+    return PyLong_FromLong((long)res);
+}
+
 /* Helper to check for object.__setattr__ or __delattr__ applied to a type.
    This is called the Carlo Verre hack after its discoverer.  See
    https://mail.python.org/pipermail/python-dev/2003-April/034535.html
@@ -7521,6 +7549,62 @@ SLOT1BIN(slot_nb_true_divide, nb_true_divide, __truediv__, __rtruediv__)
 SLOT1(slot_nb_inplace_floor_divide, __ifloordiv__, PyObject *)
 SLOT1(slot_nb_inplace_true_divide, __itruediv__, PyObject *)
 
+static int
+half_compare(PyObject *self, PyObject *other)
+{
+    PyObject *func, *args, *res;
+    int unbound;
+    Py_ssize_t c;
+
+    func = lookup_method(self, &_Py_ID(__cmp__), &unbound);
+    if (func == NULL) {
+        PyErr_Clear();
+    }
+    else {
+        args = PyTuple_Pack(1, other);
+        if (args == NULL)
+            res = NULL;
+        else {
+            res = PyObject_Call(func, args, NULL);
+            Py_DECREF(args);
+        }
+        Py_DECREF(func);
+        if (res != Py_NotImplemented) {
+            if (res == NULL)
+                return -2;
+            c = PyLong_AsLong(res);
+            Py_DECREF(res);
+            if (c == -1 && PyErr_Occurred())
+                return -2;
+            return (c < 0) ? -1 : (c > 0) ? 1 : 0;
+        }
+        Py_DECREF(res);
+    }
+    return 2;
+}
+
+/* This slot is published for the benefit of try_3way_compare in object.c */
+int
+_PyObject_SlotCompare(PyObject *self, PyObject *other)
+{
+    int c;
+
+    if (Py_TYPE(self)->tp_compare == _PyObject_SlotCompare) {
+        c = half_compare(self, other);
+        if (c <= 1)
+            return c;
+    }
+    if (Py_TYPE(other)->tp_compare == _PyObject_SlotCompare) {
+        c = half_compare(other, self);
+        if (c < -1)
+            return -2;
+        if (c <= 1)
+            return -c;
+    }
+    return (void *)self < (void *)other ? -1 :
+        (void *)self > (void *)other ? 1 : 0;
+}
+
 static PyObject *
 slot_tp_repr(PyObject *self)
 {
@@ -8013,6 +8097,8 @@ static slotdef slotdefs[] = {
     TPSLOT("__getattr__", tp_getattr, NULL, NULL, ""),
     TPSLOT("__setattr__", tp_setattr, NULL, NULL, ""),
     TPSLOT("__delattr__", tp_setattr, NULL, NULL, ""),
+    TPSLOT("__cmp__", tp_compare, _PyObject_SlotCompare, wrap_cmpfunc,
+           "x.__cmp__(y) <==> cmp(x,y)"),
     TPSLOT("__repr__", tp_repr, slot_tp_repr, wrap_unaryfunc,
            "__repr__($self, /)\n--\n\nReturn repr(self)."),
     TPSLOT("__hash__", tp_hash, slot_tp_hash, wrap_hashfunc,
@@ -9168,6 +9254,7 @@ PyTypeObject PySuper_Type = {
     0,                                          /* tp_vectorcall_offset */
     0,                                          /* tp_getattr */
     0,                                          /* tp_setattr */
+    0,                                          /* tp_compare */
     0,                                          /* tp_as_async */
     super_repr,                                 /* tp_repr */
     0,                                          /* tp_as_number */

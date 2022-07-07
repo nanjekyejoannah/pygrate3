@@ -707,6 +707,7 @@ extern "C" {
                 INIT_ID(__complex__), \
                 INIT_ID(__contains__), \
                 INIT_ID(__copy__), \
+                INIT_ID(__cmp__), \
                 INIT_ID(__del__), \
                 INIT_ID(__delattr__), \
                 INIT_ID(__delete__), \
@@ -863,6 +864,7 @@ extern "C" {
                 INIT_ID(closed), \
                 INIT_ID(code), \
                 INIT_ID(copy), \
+                 INIT_ID(cmp), \
                 INIT_ID(copyreg), \
                 INIT_ID(decode), \
                 INIT_ID(default), \

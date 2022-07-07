@@ -216,6 +216,7 @@ PyTypeObject PyTraceBack_Type = {
     (traverseproc)tb_traverse,                  /* tp_traverse */
     (inquiry)tb_clear,                          /* tp_clear */
     0,                                          /* tp_richcompare */
+    0,                                          /* tp_compare*/
     0,                                          /* tp_weaklistoffset */
     0,                                          /* tp_iter */
     0,                                          /* tp_iternext */

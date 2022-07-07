@@ -2344,6 +2344,7 @@ PyTypeObject PyBufferedIOBase_Type = {
     0,                          /* tp_traverse */
     0,                          /* tp_clear */
     0,                          /* tp_richcompare */
+    0,                          /* tp_compare*/
     0,                          /* tp_weaklistoffset */
     0,                          /* tp_iter */
     0,                          /* tp_iternext */
@@ -2435,6 +2436,7 @@ PyTypeObject PyBufferedReader_Type = {
     (traverseproc)buffered_traverse, /* tp_traverse */
     (inquiry)buffered_clear,    /* tp_clear */
     0,                          /* tp_richcompare */
+    0,                          /* tp_compare*/
     offsetof(buffered, weakreflist), /*tp_weaklistoffset*/
     0,                          /* tp_iter */
     (iternextfunc)buffered_iternext, /* tp_iternext */
@@ -2521,6 +2523,7 @@ PyTypeObject PyBufferedWriter_Type = {
     (traverseproc)buffered_traverse, /* tp_traverse */
     (inquiry)buffered_clear,    /* tp_clear */
     0,                          /* tp_richcompare */
+    0,                          /* tp_compare*/
     offsetof(buffered, weakreflist), /*tp_weaklistoffset*/
     0,                          /* tp_iter */
     0,                          /* tp_iternext */
@@ -2598,6 +2601,7 @@ PyTypeObject PyBufferedRWPair_Type = {
     (traverseproc)bufferedrwpair_traverse, /* tp_traverse */
     (inquiry)bufferedrwpair_clear, /* tp_clear */
     0,                          /* tp_richcompare */
+    0,                          /* tp_compare*/
     offsetof(rwpair, weakreflist), /*tp_weaklistoffset*/
     0,                          /* tp_iter */
     0,                          /* tp_iternext */
@@ -2692,6 +2696,7 @@ PyTypeObject PyBufferedRandom_Type = {
     (traverseproc)buffered_traverse, /* tp_traverse */
     (inquiry)buffered_clear,    /* tp_clear */
     0,                          /* tp_richcompare */
+    0,                          /* tp_compare*/
     offsetof(buffered, weakreflist), /*tp_weaklistoffset*/
     0,                          /* tp_iter */
     (iternextfunc)buffered_iternext, /* tp_iternext */

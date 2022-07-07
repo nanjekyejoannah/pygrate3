@@ -14527,6 +14527,7 @@ PyTypeObject PyUnicode_Type = {
     0,                            /* tp_traverse */
     0,                            /* tp_clear */
     PyUnicode_RichCompare,        /* tp_richcompare */
+    0,                            /* tp_compare */
     0,                            /* tp_weaklistoffset */
     unicode_iter,                 /* tp_iter */
     0,                            /* tp_iternext */
@@ -14887,6 +14888,7 @@ PyTypeObject PyUnicodeIter_Type = {
     (traverseproc)unicodeiter_traverse, /* tp_traverse */
     0,                  /* tp_clear */
     0,                  /* tp_richcompare */
+    0,                  /* tp_compare */
     0,                  /* tp_weaklistoffset */
     PyObject_SelfIter,          /* tp_iter */
     (iternextfunc)unicodeiter_next,     /* tp_iternext */

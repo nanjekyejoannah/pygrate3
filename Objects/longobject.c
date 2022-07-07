@@ -4640,6 +4640,24 @@ long_neg(PyLongObject *v)
     return (PyObject *)z;
 }
 
+static int
+long_coerce(PyObject **pv, PyObject **pw)
+{
+    if (PyLong_Check(*pw)) {
+        *pw = PyLong_FromLong(PyLong_AS_LONG(*pw));
+        if (*pw == NULL)
+            return -1;
+        Py_INCREF(*pv);
+        return 0;
+    }
+    else if (PyLong_Check(*pw)) {
+        Py_INCREF(*pv);
+        Py_INCREF(*pw);
+        return 0;
+    }
+    return 1; /* Can't do it */
+}
+
 static PyObject *
 long_abs(PyLongObject *v)
 {
@@ -5983,6 +6001,7 @@ static PyNumberMethods long_as_number = {
     long_and,                   /*nb_and*/
     long_xor,                   /*nb_xor*/
     long_or,                    /*nb_or*/
+    long_coerce,                /*nb_coerce*/
     long_long,                  /*nb_int*/
     0,                          /*nb_reserved*/
     long_float,                 /*nb_float*/

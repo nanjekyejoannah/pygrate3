@@ -5076,6 +5076,7 @@ static PyTypeObject Pickler_Type = {
     (traverseproc)Pickler_traverse,     /*tp_traverse*/
     (inquiry)Pickler_clear,             /*tp_clear*/
     0,                                  /*tp_richcompare*/
+    0,                                  /* tp_compare*/
     0,                                  /*tp_weaklistoffset*/
     0,                                  /*tp_iter*/
     0,                                  /*tp_iternext*/
@@ -7587,6 +7588,7 @@ static PyTypeObject Unpickler_Type = {
     (traverseproc)Unpickler_traverse,   /*tp_traverse*/
     (inquiry)Unpickler_clear,           /*tp_clear*/
     0,                                  /*tp_richcompare*/
+    0,                                  /* tp_compare*/
     0,                                  /*tp_weaklistoffset*/
     0,                                  /*tp_iter*/
     0,                                  /*tp_iternext*/

@@ -1092,6 +1092,7 @@ static PyTypeObject PyFormatterIter_Type = {
     0,                                  /* tp_traverse */
     0,                                  /* tp_clear */
     0,                                  /* tp_richcompare */
+    0,                                  /* tp_compare */
     0,                                  /* tp_weaklistoffset */
     PyObject_SelfIter,                  /* tp_iter */
     (iternextfunc)formatteriter_next,   /* tp_iternext */
@@ -1228,6 +1229,7 @@ static PyTypeObject PyFieldNameIter_Type = {
     0,                                  /* tp_traverse */
     0,                                  /* tp_clear */
     0,                                  /* tp_richcompare */
+    0,                                  /* tp_compare */
     0,                                  /* tp_weaklistoffset */
     PyObject_SelfIter,                  /* tp_iter */
     (iternextfunc)fieldnameiter_next,   /* tp_iternext */

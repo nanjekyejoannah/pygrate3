@@ -457,6 +457,7 @@ static PyTypeObject _PyExc_BaseException = {
     (traverseproc)BaseException_traverse, /* tp_traverse */
     (inquiry)BaseException_clear, /* tp_clear */
     0,                          /* tp_richcompare */
+    0,                          /* tp_compare*/
     0,                          /* tp_weaklistoffset */
     0,                          /* tp_iter */
     0,                          /* tp_iternext */

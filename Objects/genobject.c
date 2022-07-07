@@ -864,6 +864,7 @@ PyTypeObject PyGen_Type = {
     (traverseproc)gen_traverse,                 /* tp_traverse */
     0,                                          /* tp_clear */
     0,                                          /* tp_richcompare */
+    0,                                          /* tp_compare */
     offsetof(PyGenObject, gi_weakreflist),      /* tp_weaklistoffset */
     PyObject_SelfIter,                          /* tp_iter */
     (iternextfunc)gen_iternext,                 /* tp_iternext */
@@ -1211,6 +1212,7 @@ PyTypeObject PyCoro_Type = {
     (traverseproc)gen_traverse,                 /* tp_traverse */
     0,                                          /* tp_clear */
     0,                                          /* tp_richcompare */
+    0,                                          /* tp_compare */
     offsetof(PyCoroObject, cr_weakreflist),     /* tp_weaklistoffset */
     0,                                          /* tp_iter */
     0,                                          /* tp_iternext */
@@ -1602,6 +1604,7 @@ PyTypeObject PyAsyncGen_Type = {
     (traverseproc)async_gen_traverse,           /* tp_traverse */
     0,                                          /* tp_clear */
     0,                                          /* tp_richcompare */
+    0,                                          /* tp_compare */
     offsetof(PyAsyncGenObject, ag_weakreflist), /* tp_weaklistoffset */
     0,                                          /* tp_iter */
     0,                                          /* tp_iternext */

@@ -1027,6 +1027,7 @@ PyTypeObject PyStringIO_Type = {
     (traverseproc)stringio_traverse,           /*tp_traverse*/
     (inquiry)stringio_clear,                   /*tp_clear*/
     0,                                         /*tp_richcompare*/
+    0,                                         /* tp_compare*/
     offsetof(stringio, weakreflist),            /*tp_weaklistoffset*/
     0,                                         /*tp_iter*/
     (iternextfunc)stringio_iternext,           /*tp_iternext*/

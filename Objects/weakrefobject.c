@@ -676,6 +676,7 @@ static PyNumberMethods proxy_as_number = {
     proxy_and,              /*nb_and*/
     proxy_xor,              /*nb_xor*/
     proxy_or,               /*nb_or*/
+    0,                      /*nb_coerce*/
     proxy_int,              /*nb_int*/
     0,                      /*nb_reserved*/
     proxy_float,            /*nb_float*/
