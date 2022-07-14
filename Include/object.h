@@ -377,6 +377,9 @@ given type object has a specified feature.
 /* PyNumberMethods do their own coercion */
 #define Py_TPFLAGS_CHECKTYPES (1L<<4)
 
+/* tp_iter is defined */
+#define Py_TPFLAGS_HAVE_ITER (1L<<7)
+
 /* tp_richcompare is defined */
 #define Py_TPFLAGS_HAVE_RICHCOMPARE (1L<<5)
 
@@ -392,6 +395,9 @@ given type object has a specified feature.
 // Backwards compatibility alias for API that was provisional in Python 3.8
 #define _Py_TPFLAGS_HAVE_VECTORCALL Py_TPFLAGS_HAVE_VECTORCALL
 #endif
+
+/* tp_richcompare is defined */
+#define Py_TPFLAGS_HAVE_RICHCOMPARE (1L<<5)
 
 /* Set if the type is 'ready' -- fully initialized */
 #define Py_TPFLAGS_READY (1UL << 12)
@@ -409,6 +415,9 @@ given type object has a specified feature.
 #define Py_TPFLAGS_HAVE_STACKLESS_EXTENSION 0
 #endif
 
+/* Objects support nb_index in PyNumberMethods */
+#define Py_TPFLAGS_HAVE_INDEX (1L<<17)
+
 /* Objects behave like an unbound method */
 #define Py_TPFLAGS_METHOD_DESCRIPTOR (1UL << 17)
 
@@ -417,6 +426,9 @@ given type object has a specified feature.
 
 /* Type is abstract and cannot be instantiated */
 #define Py_TPFLAGS_IS_ABSTRACT (1UL << 20)
+
+/* New members introduced by Python 2.2 exist */
+#define Py_TPFLAGS_HAVE_CLASS (1L<<8)
 
 // This undocumented flag gives certain built-ins their unique pattern-matching
 // behavior, which allows a single positional subpattern to match against the
@@ -435,6 +447,9 @@ given type object has a specified feature.
 
 #define Py_TPFLAGS_DEFAULT  ( \
                  Py_TPFLAGS_HAVE_STACKLESS_EXTENSION | \
+                 Py_TPFLAGS_HAVE_INDEX | \
+                 Py_TPFLAGS_HAVE_ITER | \
+                 Py_TPFLAGS_HAVE_CLASS | \
                 0)
 
 /* NOTE: Some of the following flags reuse lower bits (removed as part of the

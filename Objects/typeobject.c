@@ -2755,6 +2755,12 @@ type_new_alloc(type_new_ctx *ctx)
     type->tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HEAPTYPE |
                       Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_GC);
 
+    /* It's a new-style number unless it specifically inherits any
+       old-style numeric behavior */
+    if ((type->tp_flags & Py_TPFLAGS_CHECKTYPES) ||
+        (type->tp_as_number == NULL))
+        type->tp_flags |= Py_TPFLAGS_CHECKTYPES;
+
     // Initialize essential fields
     type->tp_as_async = &et->as_async;
     type->tp_as_number = &et->as_number;
@@ -5784,6 +5790,7 @@ inherit_special(PyTypeObject *type, PyTypeObject *base)
     /* Copying tp_traverse and tp_clear is connected to the GC flags */
     if (!(type->tp_flags & Py_TPFLAGS_HAVE_GC) &&
         (base->tp_flags & Py_TPFLAGS_HAVE_GC) &&
+        (type->tp_flags & Py_TPFLAGS_HAVE_RICHCOMPARE/*GC slots exist*/) &&
         (!type->tp_traverse && !type->tp_clear)) {
         type->tp_flags |= Py_TPFLAGS_HAVE_GC;
         if (type->tp_traverse == NULL)
@@ -5792,6 +5799,11 @@ inherit_special(PyTypeObject *type, PyTypeObject *base)
             type->tp_clear = base->tp_clear;
     }
     type->tp_flags |= (base->tp_flags & Py_TPFLAGS_MANAGED_DICT);
+
+    if (!type->tp_as_number && base->tp_as_number) {
+        type->tp_flags &= ~Py_TPFLAGS_CHECKTYPES;
+        type->tp_flags |= base->tp_flags & Py_TPFLAGS_CHECKTYPES;
+    }
 
     if (type->tp_basicsize == 0)
         type->tp_basicsize = base->tp_basicsize;
@@ -5909,11 +5921,15 @@ inherit_slots(PyTypeObject *type, PyTypeObject *base)
         COPYNUM(nb_inplace_and);
         COPYNUM(nb_inplace_xor);
         COPYNUM(nb_inplace_or);
-        COPYNUM(nb_true_divide);
-        COPYNUM(nb_floor_divide);
-        COPYNUM(nb_inplace_true_divide);
-        COPYNUM(nb_inplace_floor_divide);
-        COPYNUM(nb_index);
+        if (base->tp_flags & Py_TPFLAGS_CHECKTYPES) {
+            COPYNUM(nb_true_divide);
+            COPYNUM(nb_floor_divide);
+            COPYNUM(nb_inplace_true_divide);
+            COPYNUM(nb_inplace_floor_divide);
+        }
+        if (type->tp_flags & Py_TPFLAGS_HAVE_INDEX) {
+            COPYNUM(nb_index);
+        }
         COPYNUM(nb_matrix_multiply);
         COPYNUM(nb_inplace_matrix_multiply);
     }
@@ -5988,43 +6004,49 @@ inherit_slots(PyTypeObject *type, PyTypeObject *base)
         COPYSLOT(tp_call);
     }
     COPYSLOT(tp_str);
-    {
-        /* Copy comparison-related slots only when
-           not overriding them anywhere */
-        if (type->tp_richcompare == NULL &&
+    if (type->tp_flags & base->tp_flags & Py_TPFLAGS_HAVE_RICHCOMPARE) {
+        if (type->tp_compare == NULL &&
+            type->tp_richcompare == NULL &&
             type->tp_hash == NULL)
         {
-            int r = overrides_hash(type);
-            if (r < 0) {
-                return -1;
-            }
-            if (!r) {
-                type->tp_richcompare = base->tp_richcompare;
-                type->tp_hash = base->tp_hash;
+            type->tp_compare = base->tp_compare;
+            type->tp_richcompare = base->tp_richcompare;
+            type->tp_hash = base->tp_hash;
+            /* Check for changes to inherited methods in Py3k*/
+            if (Py_Py2xWarningFlag) {
+                if (base->tp_hash &&
+                                (base->tp_hash != PyObject_HashNotImplemented) &&
+                                !OVERRIDES_HASH(type)) {
+                    if (OVERRIDES_EQ(type)) {
+                        if (PyErr_WarnEx("Overriding "
+                                           "__eq__ blocks inheritance "
+                                           "of __hash__ in 3.x",
+                                           1) < 0)
+                            /* XXX This isn't right.  If the warning is turned
+                               into an exception, we should be communicating
+                               the error back to the caller, but figuring out
+                               how to clean up in that case is tricky.  See
+                               issue 8627 for more. */
+                            PyErr_Clear();
+                    }
+                }
             }
         }
     }
-    {
+    else {
+        COPYSLOT(tp_compare);
+    }
+    if (type->tp_flags & base->tp_flags & Py_TPFLAGS_HAVE_ITER) {
         COPYSLOT(tp_iter);
         COPYSLOT(tp_iternext);
     }
-    {
+    if (type->tp_flags & base->tp_flags & Py_TPFLAGS_HAVE_CLASS) {
         COPYSLOT(tp_descr_get);
-        /* Inherit Py_TPFLAGS_METHOD_DESCRIPTOR if tp_descr_get was inherited,
-         * but only for extension types */
-        if (base->tp_descr_get &&
-            type->tp_descr_get == base->tp_descr_get &&
-            _PyType_HasFeature(type, Py_TPFLAGS_IMMUTABLETYPE) &&
-            _PyType_HasFeature(base, Py_TPFLAGS_METHOD_DESCRIPTOR))
-        {
-            type->tp_flags |= Py_TPFLAGS_METHOD_DESCRIPTOR;
-        }
         COPYSLOT(tp_descr_set);
         COPYSLOT(tp_dictoffset);
         COPYSLOT(tp_init);
         COPYSLOT(tp_alloc);
         COPYSLOT(tp_is_gc);
-        COPYSLOT(tp_finalize);
         if ((type->tp_flags & Py_TPFLAGS_HAVE_GC) ==
             (base->tp_flags & Py_TPFLAGS_HAVE_GC)) {
             /* They agree about gc. */
@@ -6032,7 +6054,7 @@ inherit_slots(PyTypeObject *type, PyTypeObject *base)
         }
         else if ((type->tp_flags & Py_TPFLAGS_HAVE_GC) &&
                  type->tp_free == NULL &&
-                 base->tp_free == PyObject_Free) {
+                 base->tp_free == _PyObject_Del) {
             /* A bit of magic to plug in the correct default
              * tp_free function when a derived class adds gc,
              * didn't define tp_free, and the base uses the
@@ -6662,6 +6684,11 @@ wrap_binaryfunc_l(PyObject *self, PyObject *args, void *wrapped)
     if (!check_num_args(args, 1))
         return NULL;
     other = PyTuple_GET_ITEM(args, 0);
+    if (!(self->ob_type->tp_flags & Py_TPFLAGS_CHECKTYPES) &&
+        !PyType_IsSubtype(other->ob_type, self->ob_type)) {
+        Py_INCREF(Py_NotImplemented);
+        return Py_NotImplemented;
+    }
     return (*func)(self, other);
 }
 
@@ -6674,6 +6701,11 @@ wrap_binaryfunc_r(PyObject *self, PyObject *args, void *wrapped)
     if (!check_num_args(args, 1))
         return NULL;
     other = PyTuple_GET_ITEM(args, 0);
+    if (!(self->ob_type->tp_flags & Py_TPFLAGS_CHECKTYPES) &&
+        !PyType_IsSubtype(other->ob_type, self->ob_type)) {
+        Py_INCREF(Py_NotImplemented);
+        return Py_NotImplemented;
+    }
     return (*func)(other, self);
 }
 

@@ -1406,7 +1406,7 @@ _PyObject_DictPointer(PyObject *obj)
 PyObject **
 _PyObject_GetDictPtr(PyObject *obj)
 {
-    if ((Py_TYPE(obj)->tp_flags & Py_TPFLAGS_MANAGED_DICT) == 0) {
+    if ((Py_TYPE(obj)->tp_flags & Py_TPFLAGS_MANAGED_DICT & Py_TPFLAGS_HAVE_CLASS) == 0) {
         return _PyObject_DictPointer(obj);
     }
     PyObject **dict_ptr = _PyObject_ManagedDictPointer(obj);
@@ -1582,7 +1582,7 @@ _PyObject_GenericGetAttrWithDict(PyObject *obj, PyObject *name,
     descr = _PyType_Lookup(tp, name);
 
     f = NULL;
-    if (descr != NULL) {
+    if (descr != NULL && PyType_HasFeature(descr->ob_type, Py_TPFLAGS_HAVE_CLASS)) {
         Py_INCREF(descr);
         f = Py_TYPE(descr)->tp_descr_get;
         if (f != NULL && PyDescr_IsData(descr)) {
@@ -1700,7 +1700,8 @@ _PyObject_GenericSetAttrWithDict(PyObject *obj, PyObject *name,
     Py_INCREF(tp);
     descr = _PyType_Lookup(tp, name);
 
-    if (descr != NULL) {
+    if (descr != NULL &&
+        PyType_HasFeature(descr->ob_type, Py_TPFLAGS_HAVE_CLASS)) {
         Py_INCREF(descr);
         f = Py_TYPE(descr)->tp_descr_set;
         if (f != NULL) {

@@ -2826,7 +2826,8 @@ static PyTypeObject PyDateTime_DeltaType = {
     PyObject_GenericGetAttr,                            /* tp_getattro */
     0,                                                  /* tp_setattro */
     0,                                                  /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,           /* tp_flags */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_CHECKTYPES |
+    Py_TPFLAGS_BASETYPE,           /* tp_flags */
     delta_doc,                                          /* tp_doc */
     0,                                                  /* tp_traverse */
     0,                                                  /* tp_clear */
@@ -3645,6 +3646,7 @@ static PyTypeObject PyDateTime_DateType = {
     0,                                                  /* tp_vectorcall_offset */
     0,                                                  /* tp_getattr */
     0,                                                  /* tp_setattr */
+    0,                                                  /* tp_compare */
     0,                                                  /* tp_as_async */
     (reprfunc)date_repr,                                /* tp_repr */
     &date_as_number,                                    /* tp_as_number */
@@ -3656,7 +3658,8 @@ static PyTypeObject PyDateTime_DateType = {
     PyObject_GenericGetAttr,                            /* tp_getattro */
     0,                                                  /* tp_setattro */
     0,                                                  /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,           /* tp_flags */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_CHECKTYPES | 
+    Py_TPFLAGS_BASETYPE,           /* tp_flags */
     date_doc,                                           /* tp_doc */
     0,                                                  /* tp_traverse */
     0,                                                  /* tp_clear */
@@ -3872,6 +3875,7 @@ static PyTypeObject PyDateTime_TZInfoType = {
     0,                                          /* tp_vectorcall_offset */
     0,                                          /* tp_getattr */
     0,                                          /* tp_setattr */
+    0,                                          /* tp_compare */
     0,                                          /* tp_as_async */
     0,                                          /* tp_repr */
     0,                                          /* tp_as_number */
@@ -3883,7 +3887,8 @@ static PyTypeObject PyDateTime_TZInfoType = {
     PyObject_GenericGetAttr,                    /* tp_getattro */
     0,                                          /* tp_setattro */
     0,                                          /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,   /* tp_flags */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_CHECKTYPES |
+    Py_TPFLAGS_BASETYPE,   /* tp_flags */
     tzinfo_doc,                                 /* tp_doc */
     0,                                          /* tp_traverse */
     0,                                          /* tp_clear */
@@ -4782,6 +4787,7 @@ static PyTypeObject PyDateTime_TimeType = {
     0,                                          /* tp_vectorcall_offset */
     0,                                          /* tp_getattr */
     0,                                          /* tp_setattr */
+    0,                                          /* tp_compare */
     0,                                          /* tp_as_async */
     (reprfunc)time_repr,                        /* tp_repr */
     0,                                          /* tp_as_number */
@@ -4793,7 +4799,8 @@ static PyTypeObject PyDateTime_TimeType = {
     PyObject_GenericGetAttr,                    /* tp_getattro */
     0,                                          /* tp_setattro */
     0,                                          /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_CHECKTYPES |
+    Py_TPFLAGS_BASETYPE, /* tp_flags */
     time_doc,                                   /* tp_doc */
     0,                                          /* tp_traverse */
     0,                                          /* tp_clear */
@@ -6636,6 +6643,7 @@ static PyTypeObject PyDateTime_DateTimeType = {
     0,                                          /* tp_vectorcall_offset */
     0,                                          /* tp_getattr */
     0,                                          /* tp_setattr */
+    0,                                          /* tp_compare */
     0,                                          /* tp_as_async */
     (reprfunc)datetime_repr,                    /* tp_repr */
     &datetime_as_number,                        /* tp_as_number */
@@ -6647,7 +6655,8 @@ static PyTypeObject PyDateTime_DateTimeType = {
     PyObject_GenericGetAttr,                    /* tp_getattro */
     0,                                          /* tp_setattro */
     0,                                          /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_CHECKTYPES |
+    Py_TPFLAGS_BASETYPE, /* tp_flags */
     datetime_doc,                               /* tp_doc */
     0,                                          /* tp_traverse */
     0,                                          /* tp_clear */

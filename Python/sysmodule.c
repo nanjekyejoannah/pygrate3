@@ -2473,6 +2473,7 @@ static PyStructSequence_Field flags_fields[] = {
     {"ignore_environment",      "-E"},
     {"verbose",                 "-v"},
     {"bytes_warning",           "-b"},
+    {"py2x_warning",            "-2"},
     {"quiet",                   "-q"},
     {"hash_randomization",      "-R"},
     {"isolated",                "-I"},
@@ -2521,6 +2522,7 @@ set_flags_from_config(PyInterpreterState *interp, PyObject *flags)
     SetFlag(!config->use_environment);
     SetFlag(config->verbose);
     SetFlag(config->bytes_warning);
+    SetFlag(config->py2x_warning);
     SetFlag(config->quiet);
     SetFlag(config->use_hash_seed == 0 || config->hash_seed != 0);
     SetFlag(config->isolated);
@@ -2851,6 +2853,7 @@ _PySys_InitCore(PyThreadState *tstate, PyObject *sysdict)
     SET_SYS("maxsize", PyLong_FromSsize_t(PY_SSIZE_T_MAX));
     SET_SYS("float_info", PyFloat_GetInfo());
     SET_SYS("int_info", PyLong_GetInfo());
+    SET_SYS("py2x_warning", PyBool_FromLong(Py_Py2xWarningFlag));
     /* initialize hash_info */
     if (Hash_InfoType.tp_name == NULL) {
         if (PyStructSequence_InitType2(&Hash_InfoType, &hash_info_desc) < 0) {

@@ -11,6 +11,9 @@
 #include <ctype.h>
 #include <stddef.h>               // offsetof()
 
+#define NEW_STYLE_NUMBER(o) PyType_HasFeature((o)->ob_type, \
+                Py_TPFLAGS_CHECKTYPES)
+
 
 
 /* Shorthands to return certain errors */
@@ -879,7 +882,7 @@ binary_op1(PyObject *v, PyObject *w, const int op_slot
            )
 {
     binaryfunc slotv;
-    if (Py_TYPE(v)->tp_as_number != NULL) {
+    if ((Py_TYPE(v)->tp_as_number != NULL) && NEW_STYLE_NUMBER(v)){
         slotv = NB_BINOP(Py_TYPE(v)->tp_as_number, op_slot);
     }
     else {
@@ -887,7 +890,7 @@ binary_op1(PyObject *v, PyObject *w, const int op_slot
     }
 
     binaryfunc slotw;
-    if (!Py_IS_TYPE(w, Py_TYPE(v)) && Py_TYPE(w)->tp_as_number != NULL) {
+    if (!Py_IS_TYPE(w, Py_TYPE(v)) && Py_TYPE(w)->tp_as_number != NULL && NEW_STYLE_NUMBER(w)) {
         slotw = NB_BINOP(Py_TYPE(w)->tp_as_number, op_slot);
         if (slotw == slotv) {
             slotw = NULL;
@@ -920,6 +923,29 @@ binary_op1(PyObject *v, PyObject *w, const int op_slot
             return x;
         }
         Py_DECREF(x); /* can't do it */
+    }
+    if (!NEW_STYLE_NUMBER(v) || !NEW_STYLE_NUMBER(w)) {
+        PyObject *x;
+        int err = PyNumber_CoerceEx(&v, &w);
+        if (err < 0) {
+            return NULL;
+        }
+        if (err == 0) {
+            PyNumberMethods *mv = v->ob_type->tp_as_number;
+            if (mv) {
+                binaryfunc slot;
+                slot = NB_BINOP(mv, op_slot);
+                if (slot) {
+                    x = slot(v, w);
+                    Py_DECREF(v);
+                    Py_DECREF(w);
+                    return x;
+                }
+            }
+            /* CoerceEx incremented the reference counts */
+            Py_DECREF(v);
+            Py_DECREF(w);
+        }
     }
     Py_RETURN_NOTIMPLEMENTED;
 }
@@ -985,9 +1011,11 @@ ternary_op(PyObject *v,
 {
     PyNumberMethods *mv = Py_TYPE(v)->tp_as_number;
     PyNumberMethods *mw = Py_TYPE(w)->tp_as_number;
+    PyObject *x = NULL;
+    ternaryfunc slotz = NULL;
 
     ternaryfunc slotv;
-    if (mv != NULL) {
+    if (mv != NULL  && NEW_STYLE_NUMBER(v)) {
         slotv = NB_TERNOP(mv, op_slot);
     }
     else {
@@ -995,7 +1023,7 @@ ternary_op(PyObject *v,
     }
 
     ternaryfunc slotw;
-    if (!Py_IS_TYPE(w, Py_TYPE(v)) && mw != NULL) {
+    if (!Py_IS_TYPE(w, Py_TYPE(v)) && mw != NULL && NEW_STYLE_NUMBER(w)) {
         slotw = NB_TERNOP(mw, op_slot);
         if (slotw == slotv) {
             slotw = NULL;
@@ -1032,8 +1060,8 @@ ternary_op(PyObject *v,
     }
 
     PyNumberMethods *mz = Py_TYPE(z)->tp_as_number;
-    if (mz != NULL) {
-        ternaryfunc slotz = NB_TERNOP(mz, op_slot);
+    if (mz != NULL && NEW_STYLE_NUMBER(z)) {
+        slotz = NB_TERNOP(mz, op_slot);
         if (slotz == slotv || slotz == slotw) {
             slotz = NULL;
         }
@@ -1045,6 +1073,67 @@ ternary_op(PyObject *v,
             }
             Py_DECREF(x); /* can't do it */
         }
+    }
+
+    if (!NEW_STYLE_NUMBER(v) || !NEW_STYLE_NUMBER(w) ||
+                    (z != Py_None && !NEW_STYLE_NUMBER(z))) {
+        /* we have an old style operand, coerce */
+        PyObject *v1, *z1, *w2, *z2;
+        ternaryfunc slotz = NULL;
+        int c;
+
+        c = PyNumber_CoerceEx(&v, &w);
+        if (c != 0)
+            goto error3;
+
+        /* Special case: if the third argument is None, it is
+           treated as absent argument and not coerced. */
+        if (z == Py_None) {
+            if (v->ob_type->tp_as_number) {
+                slotz = NB_TERNOP(v->ob_type->tp_as_number,
+                                  op_slot);
+                if (slotz)
+                    x = slotz(v, w, z);
+                else
+                    c = -1;
+            }
+            else
+                c = -1;
+            goto error2;
+        }
+        v1 = v;
+        z1 = z;
+        c = PyNumber_CoerceEx(&v1, &z1);
+        if (c != 0)
+            goto error2;
+        w2 = w;
+        z2 = z1;
+        c = PyNumber_CoerceEx(&w2, &z2);
+        if (c != 0)
+            goto error1;
+
+        if (v1->ob_type->tp_as_number != NULL) {
+            slotv = NB_TERNOP(v1->ob_type->tp_as_number,
+                              op_slot);
+            if (slotv)
+                x = slotv(v1, w2, z2);
+            else
+                c = -1;
+        }
+        else
+            c = -1;
+
+        Py_DECREF(w2);
+        Py_DECREF(z2);
+    error1:
+        Py_DECREF(v1);
+        Py_DECREF(z1);
+    error2:
+        Py_DECREF(v);
+        Py_DECREF(w);
+    error3:
+        if (c >= 0)
+            return x;
     }
 
     if (z == Py_None) {
