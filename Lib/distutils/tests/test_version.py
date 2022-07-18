@@ -34,7 +34,7 @@ class VersionTestCase(unittest.TestCase):
 
         for v1, v2, wanted in versions:
             try:
-                res = StrictVersion(v1)._cmp(StrictVersion(v2))
+                res = StrictVersion(v1).__cmp__(StrictVersion(v2))
             except ValueError:
                 if wanted is ValueError:
                     continue
@@ -45,14 +45,6 @@ class VersionTestCase(unittest.TestCase):
             self.assertEqual(res, wanted,
                              'cmp(%s, %s) should be %s, got %s' %
                              (v1, v2, wanted, res))
-            res = StrictVersion(v1)._cmp(v2)
-            self.assertEqual(res, wanted,
-                             'cmp(%s, %s) should be %s, got %s' %
-                             (v1, v2, wanted, res))
-            res = StrictVersion(v1)._cmp(object())
-            self.assertIs(res, NotImplemented,
-                          'cmp(%s, %s) should be NotImplemented, got %s' %
-                          (v1, v2, res))
 
 
     def test_cmp(self):
@@ -67,18 +59,10 @@ class VersionTestCase(unittest.TestCase):
 
 
         for v1, v2, wanted in versions:
-            res = LooseVersion(v1)._cmp(LooseVersion(v2))
+            res = LooseVersion(v1).__cmp__(LooseVersion(v2))
             self.assertEqual(res, wanted,
                              'cmp(%s, %s) should be %s, got %s' %
                              (v1, v2, wanted, res))
-            res = LooseVersion(v1)._cmp(v2)
-            self.assertEqual(res, wanted,
-                             'cmp(%s, %s) should be %s, got %s' %
-                             (v1, v2, wanted, res))
-            res = LooseVersion(v1)._cmp(object())
-            self.assertIs(res, NotImplemented,
-                          'cmp(%s, %s) should be NotImplemented, got %s' %
-                          (v1, v2, res))
 
 def test_suite():
     return unittest.TestLoader().loadTestsFromTestCase(VersionTestCase)
