@@ -4408,8 +4408,8 @@ PyTypeObject PyType_Type = {
     offsetof(PyTypeObject, tp_vectorcall),      /* tp_vectorcall_offset */
     0,                                          /* tp_getattr */
     0,                                          /* tp_setattr */
-    0,                                          /* tp_as_async */
     0,                                          /* tp_compare */
+    0,                                          /* tp_as_async */
     (reprfunc)type_repr,                        /* tp_repr */
     &type_as_number,                            /* tp_as_number */
     0,                                          /* tp_as_sequence */
@@ -5862,6 +5862,21 @@ overrides_hash(PyTypeObject *type)
 }
 
 static int
+overrides_name(PyTypeObject *type, char *name)
+{
+    PyObject *dict = type->tp_dict;
+
+    assert(dict != NULL);
+    if (PyDict_GetItemString(dict, name) != NULL) {
+        return 1;
+    }
+    return 0;
+}
+
+#define OVERRIDES_HASH(x)       overrides_name(x, "__hash__")
+#define OVERRIDES_EQ(x)         overrides_name(x, "__eq__")
+
+static int
 inherit_slots(PyTypeObject *type, PyTypeObject *base)
 {
     PyTypeObject *basebase;
@@ -6012,15 +6027,15 @@ inherit_slots(PyTypeObject *type, PyTypeObject *base)
             type->tp_compare = base->tp_compare;
             type->tp_richcompare = base->tp_richcompare;
             type->tp_hash = base->tp_hash;
-            /* Check for changes to inherited methods in Py3k*/
+            /* Check for changes to inherited methods in Py3k*/ 
             if (Py_Py2xWarningFlag) {
                 if (base->tp_hash &&
                                 (base->tp_hash != PyObject_HashNotImplemented) &&
                                 !OVERRIDES_HASH(type)) {
                     if (OVERRIDES_EQ(type)) {
-                        if (PyErr_WarnEx("Overriding "
+                        if (PyErr_WarnPy2x("Overriding "
                                            "__eq__ blocks inheritance "
-                                           "of __hash__ in 3.x",
+                                           "of __hash__ in 3.x", "avoid inheritance",
                                            1) < 0)
                             /* XXX This isn't right.  If the warning is turned
                                into an exception, we should be communicating
