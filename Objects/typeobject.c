@@ -6069,7 +6069,7 @@ inherit_slots(PyTypeObject *type, PyTypeObject *base)
         }
         else if ((type->tp_flags & Py_TPFLAGS_HAVE_GC) &&
                  type->tp_free == NULL &&
-                 base->tp_free == _PyObject_Del) {
+                 base->tp_free == PyObject_DEL) {
             /* A bit of magic to plug in the correct default
              * tp_free function when a derived class adds gc,
              * didn't define tp_free, and the base uses the
@@ -8144,8 +8144,6 @@ static slotdef slotdefs[] = {
     TPSLOT("__getattr__", tp_getattr, NULL, NULL, ""),
     TPSLOT("__setattr__", tp_setattr, NULL, NULL, ""),
     TPSLOT("__delattr__", tp_setattr, NULL, NULL, ""),
-    TPSLOT("__cmp__", tp_compare, _PyObject_SlotCompare, wrap_cmpfunc,
-           "x.__cmp__(y) <==> cmp(x,y)"),
     TPSLOT("__repr__", tp_repr, slot_tp_repr, wrap_unaryfunc,
            "__repr__($self, /)\n--\n\nReturn repr(self)."),
     TPSLOT("__hash__", tp_hash, slot_tp_hash, wrap_hashfunc,
@@ -8175,6 +8173,8 @@ static slotdef slotdefs[] = {
            "__gt__($self, value, /)\n--\n\nReturn self>value."),
     TPSLOT("__ge__", tp_richcompare, slot_tp_richcompare, richcmp_ge,
            "__ge__($self, value, /)\n--\n\nReturn self>=value."),
+    TPSLOT("__cmp__", tp_compare, _PyObject_SlotCompare, wrap_cmpfunc,
+           "x.__cmp__(y) <==> cmp(x,y)"),
     TPSLOT("__iter__", tp_iter, slot_tp_iter, wrap_unaryfunc,
            "__iter__($self, /)\n--\n\nImplement iter(self)."),
     TPSLOT("__next__", tp_iternext, slot_tp_iternext, wrap_next,

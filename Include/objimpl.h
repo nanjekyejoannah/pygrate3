@@ -111,10 +111,6 @@ PyAPI_FUNC(void) PyObject_Free(void *ptr);
 #define PyObject_Del            PyObject_Free
 #define PyObject_DEL            PyObject_Free
 
-/* for source compatibility with 2.2 */
-#define _PyObject_Del           PyObject_Free
-
-
 /*
  * Generic object allocator interface
  * ==================================
